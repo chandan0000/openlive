@@ -1,9 +1,19 @@
 mod hello_server;
 mod v1;
-use v1::create_route_v1;
-use axum::{Router, routing::get};
+use axum::{Router, extract::FromRef, routing::get};
 use hello_server::hello_server;
+use sea_orm::DatabaseConnection;
+use v1::create_route_v1;
 
- pub fn create_route() -> Router {
-    Router::new().route("/", get(hello_server)).merge(create_route_v1())
+#[derive(Clone, FromRef)]
+pub struct AppState {
+    pub database: DatabaseConnection,
+}
+
+pub fn create_route(db: DatabaseConnection) -> Router {
+    let app_state = AppState { database: db };
+    Router::<AppState>::new()
+        .route("/", get(hello_server))
+        .nest("api/v1", create_route_v1())
+        .with_state(app_state)
 }
