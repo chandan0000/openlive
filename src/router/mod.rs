@@ -1,7 +1,7 @@
 mod hello_server;
 mod v1;
 use axum::{Router, extract::FromRef, routing::get};
-use hello_server::hello_server;
+use hello_server::health;
 use sea_orm::DatabaseConnection;
 use v1::create_route_v1;
 
@@ -13,7 +13,7 @@ pub struct AppState {
 pub fn create_route(db: DatabaseConnection) -> Router {
     let app_state = AppState { database: db };
     Router::<AppState>::new()
-        .route("/", get(hello_server))
-        .nest("api/v1", create_route_v1())
+        .route("/health", get(health))
+        .nest("/api/v1", create_route_v1())
         .with_state(app_state)
 }
