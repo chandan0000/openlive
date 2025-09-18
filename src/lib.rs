@@ -31,11 +31,13 @@ pub async fn run_app() -> Result<(), Box<dyn std::error::Error>> {
 
     let _ = tracing::subscriber::set_global_default(FmtSubscriber::default());
 
+
     let app = router::create_route(db).layer(socketio_layer);
     info!("Starting server http://0.0.0.0:8080");
 
     let listener = tokio::net::TcpListener::bind("0.0.0.0:8080").await.unwrap();
 
+    
     axum::serve(listener, app).await.unwrap();
 
     Ok(())
