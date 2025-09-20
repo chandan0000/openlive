@@ -7,8 +7,13 @@ use sea_orm::{ConnectOptions, Database};
 use tracing::info;
 use tracing_subscriber::FmtSubscriber;
 
+mod handler;
+mod middleware;
 mod router;
 mod service;
+
+mod utils;
+
 use crate::service::socket_service::on_connect;
 
 pub async fn run_app() -> Result<(), Box<dyn std::error::Error>> {
@@ -31,13 +36,10 @@ pub async fn run_app() -> Result<(), Box<dyn std::error::Error>> {
 
     let _ = tracing::subscriber::set_global_default(FmtSubscriber::default());
 
-
     let app = router::create_route(db).layer(socketio_layer);
-    info!("Starting server http://0.0.0.0:8080");
 
     let listener = tokio::net::TcpListener::bind("0.0.0.0:8080").await.unwrap();
-
-    
+    info!("Starting server http://0.0.0.0:8080");
     axum::serve(listener, app).await.unwrap();
 
     Ok(())

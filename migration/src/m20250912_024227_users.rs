@@ -6,7 +6,21 @@ pub struct Migration;
 #[async_trait::async_trait]
 impl MigrationTrait for Migration {
     async fn up(&self, manager: &SchemaManager) -> Result<(), DbErr> {
-   
+        manager
+            .get_connection()
+            .execute_unprepared(
+                r#"
+                CREATE OR REPLACE FUNCTION update_updated_at_column()
+                RETURNS TRIGGER AS $$
+                BEGIN
+                    NEW."updated_at" = NOW();
+                    RETURN NEW;
+                END;
+                $$ language 'plpgsql';
+                "#,
+            )
+            .await?;
+
         manager
             .get_connection()
             .execute_unprepared("CREATE EXTENSION IF NOT EXISTS pgcrypto;")
@@ -24,18 +38,36 @@ impl MigrationTrait for Migration {
                             .primary_key()
                             .default(Expr::cust("gen_random_uuid()")),
                     )
-                    .col(ColumnDef::new(Users::FullName).string().not_null())
-                    .col(ColumnDef::new(Users::Email).string().not_null())
-                    .col(ColumnDef::new(Users::PhoneNumber).string().not_null())
+                    .col(ColumnDef::new(Users::FullName).string())
+                    .col(
+                        ColumnDef::new(Users::Email)
+                            .string()
+                            .not_null()
+                            .unique_key(),
+                    )
+                    .col(
+                        ColumnDef::new(Users::PhoneNumber)
+                            .string()
+                            .not_null()
+                            .unique_key(),
+                    )
                     .col(ColumnDef::new(Users::ProfileUrl).string())
                     .col(ColumnDef::new(Users::Password).string().not_null())
-                    .col(ColumnDef::new(Users::IsActive).boolean().not_null())
-                    .col(ColumnDef::new(Users::IsSuperuser).boolean().not_null())
-                    .col(ColumnDef::new(Users::IsVerified).boolean().not_null())
-                    .col(ColumnDef::new(Users::IsDeleted).boolean().not_null())
-                    .col(ColumnDef::new(Users::IsOnline).boolean().not_null())
-                    .col(ColumnDef::new(Users::CreatedAt).timestamp().not_null())
-                    .col(ColumnDef::new(Users::UpdatedAt).timestamp().not_null())
+                    .col(ColumnDef::new(Users::IsActive).boolean())
+                    .col(ColumnDef::new(Users::IsSuperuser).boolean())
+                    .col(ColumnDef::new(Users::IsVerified).boolean())
+                    .col(ColumnDef::new(Users::IsDeleted).boolean())
+                    .col(ColumnDef::new(Users::IsOnline).boolean())
+                    .col(
+                        ColumnDef::new(Users::CreatedAt)
+                            .timestamp_with_time_zone()
+                            .default(Expr::current_timestamp()),
+                    )
+                    .col(
+                        ColumnDef::new(Users::UpdatedAt)
+                            .timestamp_with_time_zone()
+                            .default(Expr::current_timestamp()),
+                    )
                     .to_owned(),
             )
             .await

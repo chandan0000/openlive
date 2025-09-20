@@ -1,7 +1,12 @@
-use axum::{Router, routing::get};
+use axum::{
+    Router,
+    routing::{get, post},
+};
+use crate::router::{AppState, hello_server::health};
+use crate::handler::auth;
 
-use crate::router::{hello_server::health, AppState};
-
-pub   fn create_route_v1() -> Router<AppState> {
-    Router::<AppState>::new().route("/hello", get(health))
+pub fn create_route_v1() -> Router<AppState> {
+    Router::<AppState>::new()
+        .route("/hello", get(health))
+        .route("/auth/signup", post(auth::user_sign_up))
 }

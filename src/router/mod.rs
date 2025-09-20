@@ -1,6 +1,7 @@
 mod hello_server;
 mod v1;
-use axum::{Router, extract::FromRef, routing::get};
+use crate::middleware::auth_middleware::auth;
+use axum::{extract::FromRef, middleware, routing::get, Router};
 use hello_server::health;
 use sea_orm::DatabaseConnection;
 use v1::create_route_v1;
@@ -16,4 +17,5 @@ pub fn create_route(db: DatabaseConnection) -> Router {
         .route("/health", get(health))
         .nest("/api/v1", create_route_v1())
         .with_state(app_state)
+        .layer(middleware::from_fn(auth))
 }
