@@ -1,17 +1,15 @@
 use axum::{
-    Router,
     http::StatusCode,
-    routing::get,
-    response::{IntoResponse, Response},
-    middleware::{self, Next},
-    extract::{Request, Extension},
+    middleware::Next,
+    response::Response,
+    extract::Request,
 };
 
 
-pub async fn auth(mut req: Request, next: Next) -> Result<Response, StatusCode> {
+pub async fn auth(req: Request, next: Next) -> Result<Response, StatusCode> {
 
 
-println!("Auth middleware request deteail {:?}", req);
+println!("Auth middleware request detected");
 
 
     // let auth_header = req.headers()

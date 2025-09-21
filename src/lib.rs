@@ -11,6 +11,7 @@ mod handler;
 mod middleware;
 mod router;
 mod service;
+mod  graphql;
 
 mod utils;
 
@@ -40,7 +41,10 @@ pub async fn run_app() -> Result<(), Box<dyn std::error::Error>> {
 
     let listener = tokio::net::TcpListener::bind("0.0.0.0:8080").await.unwrap();
     info!("Starting server http://0.0.0.0:8080");
-    axum::serve(listener, app).await.unwrap();
+    axum::serve(listener, app)
+        .with_graceful_shutdown(utils::graceful_shutdown::shutdown_signal())
+        .await
+        .unwrap();
 
     Ok(())
 }

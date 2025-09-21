@@ -70,6 +70,34 @@ impl MigrationTrait for Migration {
                     )
                     .to_owned(),
             )
+            .await?;
+        manager
+            .create_index(
+                Index::create()
+                    .name("idx-users-email")
+                    .table(Users::Table)
+                    .col(Users::Email)
+                    .to_owned(),
+            )
+            .await?;
+        manager
+            .create_index(
+                Index::create()
+                    .name("idx-users-full-name")
+                    .table(Users::Table)
+                    .col(Users::FullName)
+                    .to_owned(),
+            )
+            .await?;
+
+        manager
+            .create_index(
+                Index::create()
+                    .name("idx-users-phone")
+                    .table(Users::Table)
+                    .col(Users::PhoneNumber)
+                    .to_owned(),
+            )
             .await
     }
 

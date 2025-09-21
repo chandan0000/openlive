@@ -19,9 +19,8 @@ pub struct Model {
     pub is_verified: Option<bool>,
     pub is_deleted: Option<bool>,
     pub is_online: Option<bool>,
-    pub created_at: Option<DateTime>,
-    pub updated_at: Option<DateTime>,
-    pub is_premium: bool,
+    pub created_at: Option<DateTimeWithTimeZone>,
+    pub updated_at: Option<DateTimeWithTimeZone>,
 }
 
 #[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]
