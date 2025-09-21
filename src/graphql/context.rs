@@ -3,7 +3,7 @@ use sea_orm::{sqlx::types::uuid, DatabaseConnection};
 
 use crate::graphql::dataloaders::user_loader::UserLoader;
 
-// #[derive(Clone)]
+
 pub struct GqlContextState {
     pub db: DatabaseConnection,           
     pub current_user_id: Option<uuid::Uuid>,

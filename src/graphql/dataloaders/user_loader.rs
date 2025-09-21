@@ -3,7 +3,6 @@ use uuid::Uuid;
 use std::collections::HashMap;
 use sea_orm::{ColumnTrait, DatabaseConnection, EntityTrait, QueryFilter};
 
-#[derive(Clone)]
 pub struct UserLoader {
     pub db: DatabaseConnection,
 }
