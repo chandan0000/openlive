@@ -1,7 +1,7 @@
-use axum::response::IntoResponse;
-use async_graphql_axum::{GraphQLRequest, GraphQLResponse};
 use crate::graphql::schema::AppSchema;
+use async_graphql_axum::{GraphQLRequest, GraphQLResponse};
 use axum::extract::State;
+use axum::response::IntoResponse;
 
 pub async fn graphql_handler(
     State(schema): State<AppSchema>,
@@ -13,6 +13,6 @@ pub async fn graphql_handler(
 pub async fn graphql_playground() -> impl IntoResponse {
     // GraphiQL / Playground UI (browser)
     axum::response::Html(async_graphql::http::playground_source(
-        async_graphql::http::GraphQLPlaygroundConfig::new("/graphql"),
+        async_graphql::http::GraphQLPlaygroundConfig::new("/api/graphql"),
     ))
 }

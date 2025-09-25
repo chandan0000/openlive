@@ -1,38 +1,42 @@
 mod hello_server;
 mod v1;
-use crate::{
-    graphql::{mount::{graphql_handler, graphql_playground}, schema::{build_schema, AppSchema}},
-    middleware::auth_middleware::auth,
+use std::sync::Arc;
+
+use crate::graphql::{
+    mount::{graphql_handler, graphql_playground},
+    schema::{AppSchema, build_schema},
 };
 use axum::{
     Router,
     extract::FromRef,
-    middleware,
-    routing::{get, post},
+    routing::{get, get_service, post},
 };
 use hello_server::health;
 use sea_orm::DatabaseConnection;
+use tower_http::services::{ServeDir, ServeFile};
 use v1::create_route_v1;
 
-#[derive(Clone, FromRef)]
-pub struct AppState {
-    pub database: DatabaseConnection,
-    pub gql_schema: AppSchema,
-}
 
 pub fn create_route(db: DatabaseConnection) -> Router {
     let schema = build_schema(db.clone());
 
     // create app state with db + schema
-    let app_state = crate::router::AppState {
-        database: db.clone(),
+    let app_state = crate::utils::app_state::AppState {
+        database: Arc::new(db),
         gql_schema: schema.clone(),
     };
-    Router::<AppState>::new()
+    Router::<crate::utils::app_state::AppState>::new()
         .route("/health", get(health))
         .nest("/api/v1", create_route_v1())
-        .route("/graphql", post(graphql_handler))
+        .route("/api/graphql", post(graphql_handler))
         .route("/", get(graphql_playground))
+        .nest_service(
+            "/admin",
+            get_service(
+                ServeDir::new("assets/admin")
+                    .not_found_service(ServeFile::new("assets/admin/index.html")),
+            ),
+        )
         .with_state(app_state)
-        .layer(middleware::from_fn(auth))
+    // .layer(middleware::from_fn(auth))
 }

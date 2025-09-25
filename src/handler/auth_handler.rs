@@ -1,3 +1,5 @@
+use std::sync::Arc;
+
 use axum::{Json, extract::State, http::StatusCode, response::IntoResponse};
 
 use crate::utils::{
@@ -26,7 +28,7 @@ pub struct UserResponse {
 }
 
 pub async fn user_sign_up(
-    State(db): State<DatabaseConnection>,
+    State(db): State<Arc<DatabaseConnection>>,
     Json(req): Json<UserSignUpRequest>,
 ) -> impl IntoResponse {
     let hashed_password = hash(req.password.clone()).map_err(|err| err.into_response());
@@ -40,7 +42,7 @@ pub async fn user_sign_up(
     };
 
     let inserted_user = Users::insert(new_user)
-        .exec_with_returning(&db)
+        .exec_with_returning(&*db)
         .await
         .map_err(|err| {
             if let Some(SqlErr::UniqueConstraintViolation(_)) = err.sql_err() {
@@ -85,12 +87,12 @@ pub struct LogInRequest {
 }
 
 pub async fn login(
-    State(db): State<DatabaseConnection>,
+    State(db): State<Arc<   DatabaseConnection>>,
     Json(userlogin_req): Json<LogInRequest>,
 ) -> impl IntoResponse {
     let user_data = Users::find()
         .filter(UserColumn::Email.eq(userlogin_req.email.clone()))
-        .one(&db)
+        .one(&*db)
         .await
         .unwrap();
     if let Some(u) = user_data {
