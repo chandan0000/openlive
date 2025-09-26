@@ -11,12 +11,11 @@ use crate::{
 };
 use axum::{
     Router,
-    extract::State,
     middleware,
     routing::{get, post},
 };
 use hello_server::health;
-use sea_orm::DatabaseConnection;
+use sea_orm::{ DatabaseConnection};
 use v1::create_route_v1;
 
 pub fn create_route(db: DatabaseConnection) -> Router {
@@ -30,5 +29,6 @@ pub fn create_route(db: DatabaseConnection) -> Router {
         .nest("/api/v1", create_route_v1(app_state.clone()))
         .route("/api/graphql", post(graphql_handler))
         .route("/", get(graphql_playground))
+
         .with_state(app_state)
 }

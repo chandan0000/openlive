@@ -10,8 +10,7 @@ use crate::{
 
 pub fn user_create_route(app_state: AppState) -> Router<AppState> {
     Router::new()
-        .route("/profile", get(user_handler::user_profile_get))
-        // ✅ pass the AppState clone AND the fn
+        .route("/profile/{user_id}", get(user_handler::user_profile_get))
         .layer(middleware::from_fn_with_state(app_state.clone(), auth_middlewarefn))
-        .with_state(app_state) // give this router the same state
+        .with_state(app_state)  
 }

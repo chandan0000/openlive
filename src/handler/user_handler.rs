@@ -1,12 +1,15 @@
 use axum::{
-    extract::{Request, State},
+    extract::{Path, State},
     response::IntoResponse,
 };
-use entity::users::{Entity as Users, Model as User};
-use sea_orm::DatabaseConnection;
+use entity::users::Entity as Users;
+
+use serde::{Deserialize, Serialize};
 use std::sync::Arc;
+
 use axum::http::StatusCode;
-use serde::Serialize;
+use sea_orm::{ColumnTrait, DatabaseConnection, EntityTrait, QueryFilter, Set, SqlErr};
+
 use crate::utils::app_response::{APIResponse, ErrorResponse};
 
 #[derive(Serialize)]
@@ -19,31 +22,26 @@ pub struct UserResponse {
 
 pub async fn user_profile_get(
     State(db): State<Arc<DatabaseConnection>>,
-    request: Request,
+    Path(user_id): Path<uuid::Uuid>,
 ) -> impl IntoResponse {
-    // Extract user from request extensions (set by auth middleware)
-    let user = match request.extensions().get::<User>() {
-        Some(user) => user,
-        None => {
-            return ErrorResponse::new(
-                StatusCode::UNAUTHORIZED,
-                "User not authenticated",
-                "Authentication required",
-            )
-            .into_response();
-        }
-    };
-
-    // Return user profile
-    APIResponse::new(
-        StatusCode::OK,
-        "User profile retrieved successfully",
-        serde_json::json!({"user_info": UserResponse {
-            full_name: user.full_name.clone(),
-            email: user.email.clone(),
-            phone_number: user.phone_number.clone(),
-            profile_url: user.profile_url.clone()
-        }}),
-    )
-    .into_response()
+    let user_data = Users::find_by_id(user_id).one(&*db).await.unwrap();
+    match user_data {
+        Some(user) => APIResponse::new(
+            StatusCode::OK,
+            "User found",
+            serde_json::json!({"user_info":UserResponse{
+                full_name: user.full_name,
+                email: user.email,
+                phone_number: user.phone_number,
+                profile_url: user.profile_url
+            }}),
+        )
+        .into_response(),
+        None => ErrorResponse::new(
+            StatusCode::NOT_FOUND,
+            "User not found",
+            "No account with this email",
+        )
+        .into_response(),
+    }
 }
