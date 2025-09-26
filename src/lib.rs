@@ -1,17 +1,15 @@
 use socketioxide::SocketIo;
+use tracing::info;
 use std::time::Duration;
 
 use migration::{Migrator, MigratorTrait};
 use sea_orm::{ConnectOptions, Database};
-
-use tracing::info;
 use tracing_subscriber::FmtSubscriber;
-
+mod graphql;
 mod handler;
 mod middleware;
 mod router;
 mod service;
-mod  graphql;
 
 mod utils;
 

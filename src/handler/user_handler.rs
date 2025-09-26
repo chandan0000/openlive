@@ -40,7 +40,7 @@ pub async fn user_profile_get(
         None => ErrorResponse::new(
             StatusCode::NOT_FOUND,
             "User not found",
-            "No account with this email",
+            "No account",
         )
         .into_response(),
     }
