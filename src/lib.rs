@@ -1,6 +1,6 @@
 use socketioxide::SocketIo;
-use tracing::info;
 use std::time::Duration;
+use tracing::info;
 
 use migration::{Migrator, MigratorTrait};
 use sea_orm::{ConnectOptions, Database};
@@ -18,9 +18,9 @@ use crate::service::socket_service::on_connect;
 pub async fn run_app() -> Result<(), Box<dyn std::error::Error>> {
     let (socketio_layer, socketio_io) = SocketIo::builder().build_layer();
 
-    socketio_io.ns("/", on_connect);
+    socketio_io.ns("/socket.io", on_connect);
 
-    let mut opt = ConnectOptions::new("postgresql://postgres:12345@localhost:5432/mywellness");
+    let mut opt = ConnectOptions::new("postgresql://postgres:chandan123@localhost:5432/openlive");
     opt.max_connections(100)
         .min_connections(5)
         .connect_timeout(Duration::from_secs(8))
